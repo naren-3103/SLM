@@ -1,0 +1,10 @@
+models/tinyllama/
+models/phi2/
+
+*.bin
+*.pt
+*.gguf
+*.safetensors
+.env
+venv/
+__pycache__/
