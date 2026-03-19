@@ -8,16 +8,8 @@ class TextSummarizer:
         self.model = ModelLoader()
 
     def summarize_text(self, text):
+        prompt = f"""[INST] Summarize the following text in a few concise sentences. Output only the summary, nothing else.
 
-        prompt = f"""
-Summarize the following text.
+    Text: {text} [/INST]"""
 
-{text}
-
-Summary:
-"""
-
-        return self.model.generate(
-            prompt,
-            TOKEN_LIMITS["summarization"]
-        )
+        return self.model.generate(prompt, TOKEN_LIMITS["summarization"])

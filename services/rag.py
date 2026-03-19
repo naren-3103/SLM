@@ -3,6 +3,7 @@ from rag_pipeline.embedding import Embedder
 from rag_pipeline.index_documents import build_vector_db
 from app.config import TOKEN_LIMITS
 
+
 class RAGPipeline:
 
     def __init__(self):
@@ -18,6 +19,7 @@ class RAGPipeline:
         if self.vector_db is None:
             raise ValueError("Vector database was not created.")
 
+
     def ask(self, question):
 
         query_embedding = self.embedder.encode([question])[0]
@@ -26,18 +28,13 @@ class RAGPipeline:
 
         context = " ".join(contexts)
 
-        prompt = f"""You are a research assistant.
+        # Mistral Instruct format with strict grounding instruction
+        prompt = f"""[INST] You are a research assistant. Answer the question using ONLY the provided context. If the answer is not present in the context, say "Not found in the document". Do not add any information from outside the context.
 
-        Answer the question using ONLY the provided context.
-        If the answer is not present in the context, say "Not found in the document".
+Context:
+{context}
 
-        Context:
-        {context}
-
-        Question:
-        {question}
-
-        Answer:"""
+Question: {question} [/INST]"""
 
         answer = self.model.generate(
             prompt,

@@ -9,7 +9,6 @@ class TextGenerator:
 
     def generate(self, prompt):
 
-        return self.model.generate(
-            prompt,
-            TOKEN_LIMITS["generation"]
-        )
+        prompt = f"""[INST] {prompt} [/INST]"""
+
+        return self.model.generate(prompt, TOKEN_LIMITS["generation"])

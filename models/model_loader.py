@@ -1,60 +1,71 @@
-import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM
-
-from app.config import MODEL_PATH, GENERATION_CONFIG
+import os
+from huggingface_hub import hf_hub_download
+from llama_cpp import Llama
+from app.config import HF_TOKEN, GENERATION_CONFIG
 
 
 class ModelLoader:
 
-    def __init__(self):
+    _instance = None  # singleton — model loads only once
 
-        # Detect device automatically
-        self.device = torch.device(
-            "cuda" if torch.cuda.is_available() else "cpu"
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+            cls._instance._initialize()
+        return cls._instance
+
+
+    def _initialize(self):
+
+        print("Downloading GGUF model (~4GB)...")
+
+        model_file = hf_hub_download(
+            repo_id="TheBloke/Mistral-7B-Instruct-v0.2-GGUF",
+            filename="mistral-7b-instruct-v0.2.Q4_K_M.gguf",
+            token=HF_TOKEN,
+            cache_dir="/content/SLM/models/cache"
         )
 
-        print(f"Using device: {self.device}")
+        print(f"Model file ready: {model_file}")
+        print("Loading into memory...")
 
-        self.tokenizer = AutoTokenizer.from_pretrained(
-            MODEL_PATH,
-            trust_remote_code=True
+        self.model = Llama(
+            model_path=model_file,
+            n_ctx=4096,
+            n_threads=4,
+            n_gpu_layers=0,
+            verbose=False
         )
 
-        self.model = AutoModelForCausalLM.from_pretrained(
-            MODEL_PATH,
-            torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
-            trust_remote_code=True
-        )
+        self.tokenizer = type("T", (), {
+            "eos_token_id": 2,
+            "pad_token_id": 2
+        })()
 
-        self.model.to(self.device)
-
-        if self.tokenizer.pad_token is None:
-            self.tokenizer.pad_token = self.tokenizer.eos_token
+        print("Model loaded successfully!")
 
 
     def generate(self, prompt, max_tokens):
+        """Generic generate — used by all services."""
 
-        inputs = self.tokenizer(
+        output = self.model(
             prompt,
-            return_tensors="pt",
-            padding=True,
-            truncation=True
-        ).to(self.device)
+            max_tokens=max_tokens,
+            temperature=GENERATION_CONFIG["temperature"],
+            top_p=GENERATION_CONFIG["top_p"],
+            top_k=GENERATION_CONFIG["top_k"],
+            echo=False,
+            stop=[
+                "</s>",
+                "[INST]",
+                "[/INST]",
+                "\nText:",
+                "\nTranslation:",
+                "\nQuestion:",
+                "\nAnswer:",
+                "\nSummary:",
+                "\n\n"
+            ]
+        )
 
-        with torch.no_grad():
-
-            outputs = self.model.generate(
-                **inputs,
-                max_new_tokens=max_tokens,
-                temperature=GENERATION_CONFIG["temperature"],
-                top_p=GENERATION_CONFIG["top_p"],
-                top_k=GENERATION_CONFIG["top_k"],
-                do_sample=GENERATION_CONFIG["do_sample"],
-                pad_token_id=self.tokenizer.eos_token_id
-            )
-
-        text = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
-
-        generated = text[len(prompt):].strip()
-
-        return generated.split("\n")[0]
+        return output["choices"][0]["text"].strip()

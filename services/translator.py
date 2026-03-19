@@ -9,15 +9,8 @@ class Translator:
 
     def translate(self, text, target_language):
 
-        prompt = f"""
-Translate the following text into {target_language}.
+        prompt = f"""[INST] Translate the following text to {target_language}. Output only the translated text, nothing else. Do not add explanations or examples.
 
-Text: {text}
+        Text: {text} [/INST]"""
 
-Translation:
-"""
-
-        return self.model.generate(
-            prompt,
-            TOKEN_LIMITS["translation"]
-        )
+        return self.model.generate(prompt, TOKEN_LIMITS["translation"])
