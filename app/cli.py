@@ -41,12 +41,17 @@ def translate(text, lang):
 
 @cli.command()
 @click.argument("question")
-def ask(question):
+@click.option("--rebuild", is_flag=True, default=False, help="Force rebuild of the vector index.")
+def ask(question, rebuild):
 
-    rag = RAGPipeline()
+    rag = RAGPipeline(force_rebuild=rebuild)
 
-    answer = rag.ask(question)
+    result = rag.ask(question)
 
     print("\nAnswer:\n")
+    print(result["answer"])
 
-    print(answer)
+    if result.get("sources"):
+        print("\nSources:")
+        for i, src in enumerate(result["sources"], start=1):
+            print(f"  [{i}] {src['source']} — page {src['page']}  (score: {src['score']:.3f})")

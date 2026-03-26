@@ -1,38 +1,65 @@
+"""
+Build (or reload) the vector database from documents in DOCUMENT_PATH.
+
+Flow
+----
+1. Try to load an existing persisted index from VECTOR_DB_PATH.
+2. If none found, load documents → chunk → embed → index → save.
+"""
+
 from rag_pipeline.document_loader import load_documents
-from rag_pipeline.chunking import chunk_text
+from rag_pipeline.chunking import chunk_documents
 from rag_pipeline.embedding import Embedder
 from rag_pipeline.vector_store import VectorStore
-from app.config import DOCUMENT_PATH
+from app.config import DOCUMENT_PATH, VECTOR_DB_PATH
 
 
-def build_vector_db():
+def build_vector_db(force_rebuild: bool = False) -> VectorStore | None:
+    """
+    Return a ready-to-use VectorStore.
 
-    print("Loading documents...")
+    Parameters
+    ----------
+    force_rebuild : bool
+        Skip loading a cached index and always rebuild from documents.
+    """
+    # ── 1. Try loading persisted index ───────────────────────────────────────
+    if not force_rebuild:
+        store = VectorStore.load(VECTOR_DB_PATH)
+        if store is not None:
+            print(f"[IndexDocuments] Using cached index ({len(store)} chunks).")
+            return store
 
-    documents = load_documents(DOCUMENT_PATH)
+    # ── 2. Load documents ────────────────────────────────────────────────────
+    print("[IndexDocuments] Loading documents...")
+    pages = load_documents(DOCUMENT_PATH)
 
-    if len(documents) == 0:
-        print("No documents found!")
+    if not pages:
+        print("[IndexDocuments] No documents found — vector DB not created.")
         return None
 
-    all_chunks = []
+    # ── 3. Chunk ─────────────────────────────────────────────────────────────
+    print("[IndexDocuments] Chunking documents...")
+    chunks = chunk_documents(pages)
+    print(f"[IndexDocuments] {len(chunks)} unique chunks created.")
 
-    for doc in documents:
+    if not chunks:
+        print("[IndexDocuments] All chunks were duplicates — nothing to index.")
+        return None
 
-        chunks = chunk_text(doc)
-
-        all_chunks.extend(chunks)
-
-    print("Total chunks created:", len(all_chunks))
-
+    # ── 4. Embed ─────────────────────────────────────────────────────────────
+    print("[IndexDocuments] Embedding chunks...")
     embedder = Embedder()
+    texts = [c["text"] for c in chunks]
+    embeddings = embedder.encode(texts)
 
-    embeddings = embedder.encode(all_chunks)
+    # ── 5. Index ─────────────────────────────────────────────────────────────
+    dim = embeddings.shape[1]
+    vector_db = VectorStore(dim)
+    vector_db.add(embeddings, chunks)
 
-    vector_db = VectorStore(len(embeddings[0]))
-
-    vector_db.add(embeddings, all_chunks)
-
-    print("Vector database created.")
+    # ── 6. Persist ───────────────────────────────────────────────────────────
+    vector_db.save(VECTOR_DB_PATH)
+    print("[IndexDocuments] Vector database built and saved.")
 
     return vector_db

@@ -7,3 +7,5 @@ sentence-transformers
 faiss-cpu
 pypdf
 click
+nltk
+rank-bm25

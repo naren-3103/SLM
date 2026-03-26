@@ -23,7 +23,7 @@ class ModelLoader:
             repo_id="TheBloke/Mistral-7B-Instruct-v0.2-GGUF",
             filename="mistral-7b-instruct-v0.2.Q4_K_M.gguf",
             token=HF_TOKEN,
-            cache_dir="/content/SLM/models/cache"
+            cache_dir=os.path.abspath(os.path.join(os.path.dirname(__file__), "cache"))
         )
 
         print(f"Model file ready: {model_file}")

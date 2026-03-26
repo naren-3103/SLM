@@ -1,5 +1,6 @@
 models/tinyllama/
 models/phi2/
+models/cache/
 
 *.bin
 *.pt
