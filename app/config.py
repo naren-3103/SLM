@@ -1,4 +1,6 @@
 import os
+from dotenv import load_dotenv
+load_dotenv()
 MODEL_NAME = "microsoft/phi-2"
 
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
@@ -31,5 +33,7 @@ TOKEN_LIMITS = {
     "translation": 40,
     "summarization": 120,
     "rag": 200,
-    "generation": 200
+    "generation": 200,
+    "mcq": 2000,
+    "notes": 2500
 }

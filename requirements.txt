@@ -9,3 +9,4 @@ pypdf
 click
 nltk
 rank-bm25
+dotenv

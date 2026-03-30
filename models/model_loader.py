@@ -22,7 +22,7 @@ class ModelLoader:
         model_file = hf_hub_download(
             repo_id="TheBloke/Mistral-7B-Instruct-v0.2-GGUF",
             filename="mistral-7b-instruct-v0.2.Q4_K_M.gguf",
-            token=HF_TOKEN,
+            token=HF_TOKEN if HF_TOKEN else None,
             cache_dir=os.path.abspath(os.path.join(os.path.dirname(__file__), "cache"))
         )
 
@@ -45,17 +45,11 @@ class ModelLoader:
         print("Model loaded successfully!")
 
 
-    def generate(self, prompt, max_tokens):
+    def generate(self, prompt, max_tokens, stop=None):
         """Generic generate — used by all services."""
 
-        output = self.model(
-            prompt,
-            max_tokens=max_tokens,
-            temperature=GENERATION_CONFIG["temperature"],
-            top_p=GENERATION_CONFIG["top_p"],
-            top_k=GENERATION_CONFIG["top_k"],
-            echo=False,
-            stop=[
+        if stop is None:
+            stop = [
                 "</s>",
                 "[INST]",
                 "[/INST]",
@@ -66,6 +60,15 @@ class ModelLoader:
                 "\nSummary:",
                 "\n\n"
             ]
+
+        output = self.model(
+            prompt,
+            max_tokens=max_tokens,
+            temperature=GENERATION_CONFIG["temperature"],
+            top_p=GENERATION_CONFIG["top_p"],
+            top_k=GENERATION_CONFIG["top_k"],
+            echo=False,
+            stop=stop
         )
 
         return output["choices"][0]["text"].strip()

@@ -4,6 +4,8 @@ from services.summarizer import TextSummarizer
 from services.generator import TextGenerator
 from services.translator import Translator
 from services.rag import RAGPipeline
+from services.mcq_generator import MCQGenerator
+from services.notes_generator import NotesGenerator
 
 
 @click.group()
@@ -55,3 +57,26 @@ def ask(question, rebuild):
         print("\nSources:")
         for i, src in enumerate(result["sources"], start=1):
             print(f"  [{i}] {src['source']} — page {src['page']}  (score: {src['score']:.3f})")
+
+
+@cli.command()
+@click.argument("topic")
+@click.argument("count", type=int)
+@click.argument("category", type=click.Choice(["easy", "medium", "difficult"], case_sensitive=False))
+def questions(topic, count, category):
+
+    generator = MCQGenerator()
+
+    print(f"\nGenerating {count} {category} questions about '{topic}'...")
+    print(generator.generate_questions(topic, count, category))
+
+
+@cli.command()
+@click.argument("topic")
+def notes(topic):
+
+    generator = NotesGenerator()
+
+    print(f"\nGenerating student-friendly notes about '{topic}'...\n")
+    print(generator.generate_notes(topic))
+
