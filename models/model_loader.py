@@ -1,5 +1,5 @@
 """
-Model Loader module for handling the downloading and initializing of the language model.
+Model Loader module for handling the downloading and initializing of the language model natively without C++.
 """
 import os
 from huggingface_hub import hf_hub_download
@@ -20,7 +20,6 @@ class ModelLoader:
             cls._instance = super().__new__(cls)
             cls._instance._initialize()
         return cls._instance
-
 
     def _initialize(self):
         """Initializes the model by downloading (if necessary) and loading it into memory."""
@@ -52,10 +51,9 @@ class ModelLoader:
 
         print("Model loaded successfully!")
 
-
     def generate(self, prompt, max_tokens, stop=None):
         """Generic generate — used by all services."""
-
+        
         if stop is None:
             stop = [
                 "</s>",
@@ -66,7 +64,9 @@ class ModelLoader:
                 "\nQuestion:",
                 "\nAnswer:",
                 "\nSummary:",
-                "\n\n"
+                "\n\n",
+                "<|user|>",
+                "<|system|>"
             ]
 
         output = self.model(
@@ -79,4 +79,12 @@ class ModelLoader:
             stop=stop
         )
 
-        return output["choices"][0]["text"].strip()
+        generated_text = output["choices"][0]["text"].strip()
+                    
+        # Remove common repeating generation prefixes 
+        prefixes_to_strip = ["Translation:", "Summary:", "Answer:", "\nTranslation:", "Text:"]
+        for p in prefixes_to_strip:
+            if generated_text.startswith(p):
+                generated_text = generated_text[len(p):].strip()
+                    
+        return generated_text.strip()

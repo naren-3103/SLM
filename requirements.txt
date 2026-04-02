@@ -1,7 +1,7 @@
 transformers
 torch
 accelerate
-llama-cpp-python
+llama-cpp-python==0.2.90
 huggingface_hub
 sentence-transformers
 faiss-cpu
@@ -10,3 +10,4 @@ click
 nltk
 rank-bm25
 dotenv
+streamlit
