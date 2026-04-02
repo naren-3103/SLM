@@ -1,3 +1,6 @@
+"""
+Service for automatically generating Multiple Choice Questions (MCQs) via RAG.
+"""
 from models.model_loader import ModelLoader
 from rag_pipeline.embedding import Embedder
 from rag_pipeline.index_documents import build_vector_db
@@ -5,13 +8,29 @@ from app.config import TOKEN_LIMITS, TOP_K, SCORE_THRESHOLD
 
 
 class MCQGenerator:
+    """
+    Uses the RAG pipeline retrieving context to build multiple-choice questions 
+    based on the document embeddings.
+    """
 
     def __init__(self):
+        """Initializes the MCQ generator with models, embedder, and vector DB."""
         self.model = ModelLoader()
         self.embedder = Embedder()
         self.vector_db = build_vector_db()
 
     def generate_questions(self, topic, count, category):
+        """
+        Generates MCQs using relevant document context.
+
+        Args:
+            topic (str): The topic or subject for the questions.
+            count (int): Number of questions to generate.
+            category (str): Difficulty level ('easy', 'medium', 'difficult').
+
+        Returns:
+            str: The raw generated text containing questions and options.
+        """
 
         # 1. Fetch context from Vector DB
         context = "No relevant context found."

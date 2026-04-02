@@ -1,3 +1,6 @@
+"""
+Service for generating comprehensive, student-friendly notes from documents using RAG.
+"""
 from models.model_loader import ModelLoader
 from rag_pipeline.embedding import Embedder
 from rag_pipeline.index_documents import build_vector_db
@@ -5,13 +8,27 @@ from app.config import TOKEN_LIMITS, TOP_K, SCORE_THRESHOLD
 
 
 class NotesGenerator:
+    """
+    Retrieves context from the local vector database and utilizes the model 
+    to output structured, educational notes on a specific topic.
+    """
 
     def __init__(self):
+        """Initializes the Notes generator with the LLM, embedder, and Vector store."""
         self.model = ModelLoader()
         self.embedder = Embedder()
         self.vector_db = build_vector_db()
 
     def generate_notes(self, topic):
+        """
+        Retrieves relevant chunks and generates notes on the given topic.
+
+        Args:
+            topic (str): The subject to generate notes for.
+
+        Returns:
+            str: The generated study notes in markdown format.
+        """
 
         # 1. Fetch context from Vector DB
         context = "No relevant context found."

@@ -1,3 +1,6 @@
+"""
+Model Loader module for handling the downloading and initializing of the language model.
+"""
 import os
 from huggingface_hub import hf_hub_download
 from llama_cpp import Llama
@@ -5,6 +8,10 @@ from app.config import HF_TOKEN, GENERATION_CONFIG
 
 
 class ModelLoader:
+    """
+    Singleton class to load and provide inference using the Llama model.
+    Ensures the model is only loaded into memory once.
+    """
 
     _instance = None  # singleton — model loads only once
 
@@ -16,6 +23,7 @@ class ModelLoader:
 
 
     def _initialize(self):
+        """Initializes the model by downloading (if necessary) and loading it into memory."""
 
         print("Downloading GGUF model (~4GB)...")
 

@@ -1,3 +1,6 @@
+"""
+Configuration settings and environment variables for the SLM AI Toolkit.
+"""
 import os
 from dotenv import load_dotenv
 load_dotenv()

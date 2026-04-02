@@ -1,3 +1,8 @@
+"""
+Command-line interface defining the available tools in the SLM Toolkit.
+This module registers click commands for text summarization, generation,
+translation, RAG querying, MCQ generation, and notes generation.
+"""
 import click
 
 from services.summarizer import TextSummarizer
@@ -10,6 +15,9 @@ from services.notes_generator import NotesGenerator
 
 @click.group()
 def cli():
+    """
+    SLM Tool CLI base command group.
+    """
     pass
 
 
