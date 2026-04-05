@@ -4,7 +4,7 @@ Model Loader module for handling the downloading and initializing of the languag
 import os
 from huggingface_hub import hf_hub_download
 from llama_cpp import Llama
-from app.config import HF_TOKEN, GENERATION_CONFIG
+from app.config import HF_TOKEN, GENERATION_CONFIG, REPO_ID, MODEL_NAME
 
 
 class ModelLoader:
@@ -27,8 +27,8 @@ class ModelLoader:
         print("Downloading GGUF model (~4GB)...")
 
         model_file = hf_hub_download(
-            repo_id="TheBloke/Mistral-7B-Instruct-v0.2-GGUF",
-            filename="mistral-7b-instruct-v0.2.Q4_K_M.gguf",
+            repo_id=REPO_ID,
+            filename=MODEL_NAME,
             token=HF_TOKEN if HF_TOKEN else None,
             cache_dir=os.path.abspath(os.path.join(os.path.dirname(__file__), "cache"))
         )

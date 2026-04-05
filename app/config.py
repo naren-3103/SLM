@@ -4,8 +4,8 @@ Configuration settings and environment variables for the SLM AI Toolkit.
 import os
 from dotenv import load_dotenv
 load_dotenv()
-MODEL_NAME = "microsoft/phi-2"
-
+MODEL_NAME = "mistral-7b-instruct-v0.2.Q4_K_M.gguf"
+REPO_ID = "TheBloke/Mistral-7B-Instruct-v0.2-GGUF"
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 HF_TOKEN = os.getenv("HF_TOKEN", "")
 MODEL_PATH = "models/phi2"
